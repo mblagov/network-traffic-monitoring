@@ -33,4 +33,8 @@ public class Spark implements Runnable {
             e.printStackTrace();
         }
     }
+
+    public JavaDStream<HostTraffic> getStream() {
+        return stream;
+    }
 }
