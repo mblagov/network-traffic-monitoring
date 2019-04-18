@@ -7,7 +7,7 @@ import org.pcap4j.util.NifSelector;
 
 import java.io.IOException;
 
-public class TrafficReceiver extends Receiver<HostTraffic> {
+public class TrafficReceiver extends Receiver<Integer> {
 
     private PcapHandle handle;
     final int snapshotLength = 65536; // in bytes
@@ -36,9 +36,7 @@ public class TrafficReceiver extends Receiver<HostTraffic> {
 
         // Create a listener that defines what to do with the received packets
         PacketListener listener = packet -> {
-            HostTraffic hostTraffic = new HostTraffic();
-            hostTraffic.setTrafficAmount(packet.length());
-            TrafficReceiver.this.store(hostTraffic);
+            TrafficReceiver.this.store(packet.length());
         };
 
         // run in new thread to separate capturing of traffic from main thread

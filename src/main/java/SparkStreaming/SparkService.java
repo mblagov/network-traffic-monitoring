@@ -7,11 +7,11 @@ import org.apache.spark.streaming.Seconds;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
-public class Spark implements Runnable {
-    JavaDStream<HostTraffic> stream;
+public class SparkService implements Runnable {
+    JavaDStream<Integer> stream;
     JavaStreamingContext jssc;
 
-    public Spark() {
+    public SparkService() {
         SparkConf sparkConf = new SparkConf()
                 .setAppName("network-traffic-monitoring")
                 .setMaster("local[2]");
@@ -34,7 +34,7 @@ public class Spark implements Runnable {
         }
     }
 
-    public JavaDStream<HostTraffic> getStream() {
+    public JavaDStream<Integer> getStream() {
         return stream;
     }
 }
