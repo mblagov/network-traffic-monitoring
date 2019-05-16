@@ -1,4 +1,4 @@
-package SparkStreaming;
+package Models;
 
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.streaming.receiver.Receiver;
@@ -7,7 +7,7 @@ import org.pcap4j.util.NifSelector;
 
 import java.io.IOException;
 
-public class TrafficReceiver extends Receiver<Integer> {
+public class TrafficReceiver extends Receiver<HostTraffic> {
 
     private PcapHandle handle;
     final int snapshotLength = 65536; // in bytes
@@ -36,7 +36,9 @@ public class TrafficReceiver extends Receiver<Integer> {
 
         // Create a listener that defines what to do with the received packets
         PacketListener listener = packet -> {
-            TrafficReceiver.this.store(packet.length());
+            HostTraffic hostTraffic = new HostTraffic();
+            hostTraffic.setTrafficAmount(packet.length());
+            TrafficReceiver.this.store(hostTraffic);
         };
 
         // run in new thread to separate capturing of traffic from main thread

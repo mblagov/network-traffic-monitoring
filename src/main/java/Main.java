@@ -1,5 +1,12 @@
-import org.pcap4j.core.*;
-import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode;
+import Models.HostTraffic;
+import Models.TrafficReceiver;
+import org.apache.spark.SparkConf;
+import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.Minutes;
+import org.apache.spark.streaming.Seconds;
+import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.JavaStreamingContext;
+import org.pcap4j.core.PcapNetworkInterface;
 import org.pcap4j.util.NifSelector;
 
 import java.io.IOException;
@@ -16,36 +23,16 @@ public class Main {
         return device;
     }
 
-    public static void main(String[] args) throws PcapNativeException, NotOpenException {
+    public static void main(String[] args) {
 
-        PcapNetworkInterface device = getNetworkDevice();
-        System.out.println("You chose: " + device);
-
-        if (device == null) {
-            System.out.println("No device chosen.");
-            System.exit(1);
-        }
-
-        // Open the device and get a handle
-        int snapshotLength = 65536; // in bytes
-        int readTimeout = 50; // in milliseconds
-        final PcapHandle handle;
-        handle = device.openLive(snapshotLength, PromiscuousMode.PROMISCUOUS, readTimeout);
-
-        // Create a listener that defines what to do with the received packets
-        PacketListener listener = packet -> {
-            // Override the default gotPacket() function and process packet
-            System.out.println(handle.getTimestamp());
-            System.out.println(packet.length());
-        };
-
-        try {
-            int maxPackets = 10;
-            handle.loop(maxPackets, listener);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        handle.close();
+        SparkConf sparkConf = new SparkConf()
+                .setAppName("network-traffic-monitoring")
+                .setMaster("local[2]");
+        JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(1));
+        JavaDStream<HostTraffic> stream = jssc
+                .receiverStream(new TrafficReceiver());
+        jssc.checkpoint("file:///home/students/network-traffic-monitoring/checkpoints");
+        stream = stream.window(Minutes.apply(5), Seconds.apply(1));
     }
+
 }

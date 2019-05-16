@@ -1,0 +1,3 @@
+#!/bin/bash
+mvn clean install assembly:single
+scp -r -P 2534 target/network-traffic-monitoring-1.0-SNAPSHOT-jar-with-dependencies.jar students@188.134.91.77:/home/students/network-traffic-monitoring
