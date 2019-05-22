@@ -3,9 +3,9 @@ package Models;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.streaming.receiver.Receiver;
 import org.pcap4j.core.*;
-import org.pcap4j.util.NifSelector;
 
-import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class TrafficReceiver extends Receiver<HostTraffic> {
 
@@ -19,8 +19,18 @@ public class TrafficReceiver extends Receiver<HostTraffic> {
 
     @Override
     public void onStart() {
-        PcapNetworkInterface device = getNetworkDevice();
-        System.out.println("You chose: " + device);
+        InetAddress addr = null;
+        PcapNetworkInterface device = null;
+        try {
+            addr = InetAddress.getByName("127.0.0.1");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        try {
+            device = Pcaps.getDevByAddress(addr);
+        } catch (PcapNativeException e) {
+            e.printStackTrace();
+        }
 
         if (device == null) {
             System.out.println("No device chosen.");
@@ -59,13 +69,4 @@ public class TrafficReceiver extends Receiver<HostTraffic> {
         handle.close();
     }
 
-    static PcapNetworkInterface getNetworkDevice() {
-        PcapNetworkInterface device = null;
-        try {
-            device = new NifSelector().selectNetworkInterface();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return device;
-    }
 }
